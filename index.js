@@ -14,27 +14,27 @@ var request = require('request');
 var prompt = require('cli-prompt');
 
 // Convert 'satoshi' to bitcoin value
-var satoshiToBTC = function(value) {
+var satoshiToBTC = function (value) {
 	return value * 0.00000001;
 };
 
 // Broadcasts a transaction to the network via blockchain.info
-var broadcast_tx = function(tx) {
-  console.log("tx in hex = ", tx.toHex());
-  var options = {
+var broadcast_tx = function (tx) {
+	console.log("tx in hex = ", tx.toHex());
+	var options = {
 		uri: 'https://blockchain.info/pushtx',
 		method: 'POST',
 		json: {
 			"tx": tx.toHex()
 		}
-  	     };
+	};
 
- request(options, function(err, httpResponse, body) {
-	if (err) {
-		console.error('Request failed:', err);
-	} else {
-		console.log('Broadcast results:', body);
-		console.log("Transaction send with hash:", tx.getId());
+	request(options, function (err, httpResponse, body) {
+		if (err) {
+			console.error('Request failed:', err);
+		} else {
+			console.log('Broadcast results:', body);
+			console.log("Transaction send with hash:", tx.getId());
 		}
 	});
 }
@@ -58,48 +58,48 @@ prompt('Enter the private key of the source address (WIF format): ', function (p
 
 	request(url, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
-		//Parse the response and get the first unspent output
-		var json = JSON.parse(body);
-			
-		var unspent = json["unspent_outputs"][0];
-		var unspentvalue = 4000
+			//Parse the response and get the first unspent output
+			var json = JSON.parse(body);
 
-		console.log("JSON unspent", unspent);
+			var unspent = json["unspent_outputs"][0];
+			var unspentvalue = 4000
 
-		// Prompt for the destination address
-		console.log("Found an unspent transaction output with ", satoshiToBTC(unspentvalue), " BTC.");
+			console.log("JSON unspent", unspent);
 
-		prompt('Enter a destination address: ', function(dest_address) {
-		// Calculate the withdraw amount minus the tx fee
-		var withdraw_amount = unspent.value - tx_fee;
+			// Prompt for the destination address
+			console.log("Found an unspent transaction output with ", satoshiToBTC(unspentvalue), " BTC.");
 
-		console.log("Unspent value (BTC)= ", satoshiToBTC(unspentvalue));
-		console.log("Tx fee (BTC)= ", satoshiToBTC(tx_fee));
-		console.log("Withdraw amount (BTC)= ", satoshiToBTC(withdraw_amount));
+			prompt('Enter a destination address: ', function (dest_address) {
+				// Calculate the withdraw amount minus the tx fee
+				var withdraw_amount = unspent.value - tx_fee;
 
-		// Build a transaction
-		console.log("TransactionBuilder input tx_hash_big_endian = ", unspent.tx_hash_big_endian);
-		console.log("TransactionBuilder input tx_output_n = ", unspent.tx_output_n);
-                
-		var returnAmount = 2589
+				console.log("Unspent value (BTC)= ", satoshiToBTC(unspentvalue));
+				console.log("Tx fee (BTC)= ", satoshiToBTC(tx_fee));
+				console.log("Withdraw amount (BTC)= ", satoshiToBTC(withdraw_amount));
 
-		var txb = new bitcoin.TransactionBuilder();
-		txb.addInput(unspent.tx_hash_big_endian, unspent.tx_output_n);
-		txb.addOutput(dest_address, withdraw_amount);
-		txb.addOutput(source_address,  returnAmount)
+				// Build a transaction
+				console.log("TransactionBuilder input tx_hash_big_endian = ", unspent.tx_hash_big_endian);
+				console.log("TransactionBuilder input tx_output_n = ", unspent.tx_output_n);
 
-		txb.sign(0, keyPair);
-		var tx = txb.build();
+				var returnAmount = 2589
 
-		console.log("tx = ", tx);
+				var txb = new bitcoin.TransactionBuilder();
+				txb.addInput(unspent.tx_hash_big_endian, unspent.tx_output_n);
+				txb.addOutput(dest_address, withdraw_amount);
+				txb.addOutput(source_address, returnAmount)
 
-		// Prompt to confirm sending the transaction
-		var confirm = "Send " + satoshiToBTC(withdraw_amount) + " plus miner fee? (y/N):";
-		prompt(confirm, function(result) {
-		if (result.toUpperCase() == "Y") {
-			broadcast_tx(tx);
-		  .
-		});
+				txb.sign(0, keyPair);
+				var tx = txb.build();
+
+				console.log("tx = ", tx);
+
+				// Prompt to confirm sending the transaction
+				var confirm = "Send " + satoshiToBTC(withdraw_amount) + " plus miner fee? (y/N):";
+				prompt(confirm, function (result) {
+					if (result.toUpperCase() == "Y") {
+						broadcast_tx(tx);
+					}
+				});
 
 			});
 		} else {
