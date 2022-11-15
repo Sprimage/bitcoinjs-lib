@@ -2,7 +2,7 @@ const bip39 = require('bip39')
 const bip32 = require('bip32')
 const bitcoin = require('bitcoinjs-lib')
 
-const mnemonic = "step model pattern onion pulp lounge left also hill what corn approve fun despair mail resist liar energy country wife test monkey multiply faculty"
+const mnemonic = ""
 
 
 let phrase = bip39.generateMnemonic();
